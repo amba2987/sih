@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedCase EHR - Patient Intake Module</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --sidebar-bg: #1e293b;
+            --sidebar-hover: #334155;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --success-hover: #15803d;
+            --danger: #dc2626;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 20px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            border-bottom: 1px solid var(--sidebar-hover);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .nav-link {
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            color: #cbd5e1;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background-color: var(--sidebar-hover);
+            color: var(--white);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        /* Main Content Container */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            color: var(--text-dark);
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .lang-select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--white);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Form Card & Sections */
+        .card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        /* Buttons & Actions */
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+
+        /* Floating AI Chatbot Container */
+        .chatbot-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 1000;
+        }
+
+        .chat-toggle-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: transform 0.2s;
+        }
+
+        .chat-toggle-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-window {
+            display: none;
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 350px;
+            height: 450px;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            border: 1px solid var(--border-color);
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f8fafc;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .chat-msg.bot {
+            background: #e2e8f0;
+            color: var(--text-dark);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .chat-msg.user {
+            background: var(--primary);
+            color: var(--white);
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-chips {
+            display: flex;
+            gap: 6px;
+            padding: 8px 12px;
+            background: #fff;
+            border-top: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .chip {
+            padding: 4px 10px;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .chip:hover {
+            background: #e2e8f0;
+        }
+
+        .chat-input-area {
+            display: flex;
+            border-top: 1px solid var(--border-color);
+            background: var(--white);
+        }
+
+        .chat-input-area input {
+            flex-grow: 1;
+            border: none;
+            padding: 12px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .chat-input-area button {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 0 15px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <span>🏥 MedCase EHR</span>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-link active" onclick="switchSection('registration', this)" data-i18n="nav1">1. Registration</li>
+            <li class="nav-link" onclick="switchSection('demographics', this)" data-i18n="nav2">2. Demographics</li>
+            <li class="nav-link" onclick="switchSection('complaint', this)" data-i18n="nav3">3. Chief Complaint</li>
+            <li class="nav-link" onclick="switchSection('vitals', this)" data-i18n="nav4">4. Clinical Vitals</li>
+            <li class="nav-link" onclick="switchSection('treatment', this)" data-i18n="nav5">5. Diagnosis & Plan</li>
+            <li class="nav-link" onclick="switchSection('summary', this)" data-i18n="nav6">6. Case Summary</li>
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="header-area">
+            <div>
+                <h1 class="page-title" data-i18n="pageTitle">Patient Case Taking Module</h1>
+                <p class="page-subtitle" data-i18n="pageSubtitle">Record comprehensive patient registrations, clinical findings, and medical histories.</p>
+            </div>
+            <select class="lang-select" onchange="changeLanguage(this.value)">
+                <option value="en">English</option>
+                <option value="hi">हिंदी (Hindi)</option>
+                <option value="bn">বাংলা (Bengali)</option>
+                <option value="te">తెలుగు (Telugu)</option>
+                <option value="ta">தமிழ் (Tamil)</option>
+                <option value="mr">मराठी (Marathi)</option>
+                <option value="gu">ગુજરાતી (Gujarati)</option>
+                <option value="es">Español</option>
+            </select>
+        </div>
+
+        <div class="card">
+            <!-- Step 1: Registration -->
+            <div id="sec-registration" class="form-section active">
+                <h2 class="section-title" data-i18n="sec1Title">Patient Registration & Verification</h2>
+                <div class="form-group">
+                    <label data-i18n="lblAadhar">Aadhaar / National ID Number</label>
+                    <input type="text" id="aadhar" class="form-control" data-i18n-ph="phAadhar" placeholder="e.g. 1234 5678 9012">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="lblPhone">Phone Number</label>
+                        <input type="tel" id="regPhone" class="form-control" data-i18n-ph="phPhone" placeholder="e.g. 9876543210">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblEmail">Email Address</label>
+                        <input type="email" id="email" class="form-control" data-i18n-ph="phEmail" placeholder="e.g. patient@example.com">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Demographics -->
+            <div id="sec-demographics" class="form-section">
+                <h2 class="section-title" data-i18n="sec2Title">Patient Demographics</h2>
+                <div class="form-group">
+                    <label data-i18n="lblName">Full Name</label>
+                    <input type="text" id="fullName" class="form-control" data-i18n-ph="phName" placeholder="e.g. Jane Doe">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="lblAge">Age</label>
+                        <input type="number" id="age" class="form-control" data-i18n-ph="phAge" placeholder="e.g. 32">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblGender">Gender</label>
+                        <select id="gender" class="form-control">
+                            <option value="" data-i18n="optGenderDefault">Select Gender</option>
+                            <option value="Female" data-i18n="optFemale">Female</option>
+                            <option value="Male" data-i18n="optMale">Male</option>
+                            <option value="Other" data-i18n="optOther">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="lblAddress">Address / Location</label>
+                    <input type="text" id="address" class="form-control" data-i18n-ph="phAddress" placeholder="e.g. City, State">
+                </div>
+            </div>
+
+            <!-- Step 3: Chief Complaint -->
+            <div id="sec-complaint" class="form-section">
+                <h2 class="section-title" data-i18n="sec3Title">Chief Complaint & Medical History</h2>
+                <div class="form-group">
+                    <label data-i18n="lblComplaint">Primary Symptoms / Reason for Visit</label>
+                    <textarea id="complaint" class="form-control" data-i18n-ph="phComplaint" placeholder="Describe primary issue, onset, and duration..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="lblHasAllergy">Does the patient have any known allergies?</label>
+                    <select id="hasAllergy" class="form-control" onchange="toggleAllergyField(this.value)">
+                        <option value="No" data-i18n="optNo">No</option>
+                        <option value="Yes" data-i18n="optYes">Yes</option>
+                    </select>
+                </div>
+                <div id="allergyDetailsContainer" class="form-group" style="display: none;">
+                    <label data-i18n="lblAllergyDetails">Specify Allergies (Food, Medication, Environmental)</label>
+                    <textarea id="allergyDetails" class="form-control" data-i18n-ph="phAllergies" placeholder="List specific allergic triggers and reactions..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="lblPastHistory">Medical & Surgical History</label>
+                    <textarea id="pastHistory" class="form-control" data-i18n-ph="phPastHistory" placeholder="Previous illnesses, surgeries, chronic conditions..."></textarea>
+                </div>
+            </div>
+
+            <!-- Step 4: Vitals -->
+            <div id="sec-vitals" class="form-section">
+                <h2 class="section-title" data-i18n="sec4Title">Vitals & Examination</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-i18n="lblBP">Blood Pressure (mmHg)</label>
+                        <input type="text" id="bp" class="form-control" placeholder="120/80">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblPulse">Pulse Rate (bpm)</label>
+                        <input type="number" id="pulse" class="form-control" placeholder="72">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="lblTemp">Body Temp (°F)</label>
+                        <input type="text" id="temp" class="form-control" placeholder="98.6">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Treatment -->
+            <div id="sec-treatment" class="form-section">
+                <h2 class="section-title" data-i18n="sec5Title">Diagnosis & Treatment Plan</h2>
+                <div class="form-group">
+                    <label data-i18n="lblDiagnosis">Provisional Diagnosis</label>
+                    <input type="text" id="diagnosis" class="form-control" data-i18n-ph="phDiagnosis" placeholder="Primary diagnosis or differential options">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="lblPrescription">Prescription / Recommended Therapy</label>
+                    <textarea id="prescription" class="form-control" data-i18n-ph="phPrescription" placeholder="Medication dosage, duration, and instructions..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="lblFollowup">Follow-Up Date</label>
+                    <input type="date" id="followup" class="form-control">
+                </div>
+            </div>
+
+            <!-- Dynamic Case Summary Output (Step 6) -->
+            <div id="summaryCard" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <h3 style="color: #166534; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <span>✓</span> <span data-i18n="summaryTitle">Case Record Summary</span>
+                </h3>
+                <div id="summaryContent" style="font-size: 14px; line-height: 1.6; color: #14532d;"></div>
+            </div>
+
+            <!-- Step 7: Success Screen -->
+            <div id="sec-success" class="form-section" style="display: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 60px; color: var(--success); margin-bottom: 15px;">✓</div>
+                <h2 style="color: var(--success); margin-bottom: 10px;">Patient Case Recorded Successfully!</h2>
+                <p style="color: var(--text-muted); max-width: 500px; margin: 0 auto 30px auto;">
+                    All clinical details have been saved locally. You can start a new patient intake session or view all recorded cases.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button type="button" class="btn btn-primary" onclick="resetForm()" style="padding: 12px 24px; font-size: 15px;">
+                        + Register New Patient
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="showSavedRecords()" style="padding: 12px 24px; font-size: 15px;">
+                        📋 View Saved Records
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 8: Saved Patient Records List -->
+            <div id="sec-records" class="form-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--border-color);">
+                    <h2>All Saved Patient Records</h2>
+                    <div>
+                        <button type="button" class="btn btn-primary" onclick="resetForm()" style="padding: 8px 16px; margin-right: 8px;">+ New Patient</button>
+                        <button type="button" class="btn btn-danger" onclick="clearAllRecords()" style="padding: 8px 16px;">Clear History</button>
+                    </div>
+                </div>
+                <div id="recordsListContainer"></div>
+            </div>
+
+            <!-- Global Form Navigation Controls -->
+            <div id="navButtonsRow" class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="navigateForm(-1)" data-i18n="btnPrev">← Previous</button>
+                <div>
+                    <button type="button" class="btn btn-primary" onclick="navigateForm(1)" data-i18n="btnNext">Next →</button>
+                    <button type="button" class="btn btn-success" onclick="generateCaseSummary()" data-i18n="btnSave">Save Summary</button>
+                    <button type="button" id="btnCompleteSubmit" class="btn btn-success" onclick="submitCase()" style="display: none;">Complete Submission →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Floating Component -->
+    <div class="chatbot-container">
+        <button class="chat-toggle-btn" onclick="toggleChatbot()">💬</button>
+        <div id="chatbotWindow" class="chat-window">
+            <div class="chat-header">
+                <span data-i18n="botTitle">MedAssist AI</span>
+                <button id="chatCloseBtn" style="background:none; border:none; color:white; cursor:pointer; font-size:20px; font-weight:bold;">&times;</button>
+            </div>
+            <div id="chatMessages" class="chat-messages">
+                <div class="chat-msg bot" data-i18n="botWelcome">Hello! I'm your Clinical Intake Assistant. How can I help you take this case today?</div>
+            </div>
+            <div class="chat-chips">
+                <span class="chip" onclick="sendQuickMessage('Vitals guide')" data-i18n="chipVitals">Vitals guide</span>
+                <span class="chip" onclick="sendQuickMessage('Allergy list')" data-i18n="chipAllergies">Allergy list</span>
+                <span class="chip" onclick="sendQuickMessage('Chief complaint format')" data-i18n="chipComplaint">Chief complaint</span>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" data-i18n-ph="chatPlaceholder" placeholder="Ask MedAssist..." onkeypress="handleChatKeyPress(event)">
+                <button onclick="sendChatMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Multi-language Dictionary
+        const translations = {
+            en: {
+                nav1: "1. Registration", nav2: "2. Demographics", nav3: "3. Chief Complaint", nav4: "4. Clinical Vitals", nav5: "5. Diagnosis & Plan", nav6: "6. Case Summary",
+                pageTitle: "Patient Case Taking Module", pageSubtitle: "Record comprehensive patient registrations, clinical findings, and medical histories.",
+                sec1Title: "Patient Registration & Verification", lblAadhar: "Aadhaar / National ID Number", phAadhar: "e.g. 1234 5678 9012", lblPhone: "Phone Number", phPhone: "e.g. 9876543210", lblEmail: "Email Address", phEmail: "e.g. patient@example.com",
+                sec2Title: "Patient Demographics", lblName: "Full Name", phName: "e.g. Jane Doe", lblAge: "Age", phAge: "e.g. 32", lblGender: "Gender", optGenderDefault: "Select Gender", optFemale: "Female", optMale: "Male", optOther: "Other", lblAddress: "Address / Location", phAddress: "e.g. City, State",
+                sec3Title: "Chief Complaint & Medical History", lblComplaint: "Primary Symptoms / Reason for Visit", phComplaint: "Describe primary issue, onset, and duration...", lblHasAllergy: "Does the patient have any known allergies?", optNo: "No", optYes: "Yes", lblAllergyDetails: "Specify Allergies (Food, Medication, Environmental)", phAllergies: "List specific allergic triggers and reactions...", lblPastHistory: "Medical & Surgical History", phPastHistory: "Previous illnesses, surgeries, chronic conditions...",
+                sec4Title: "Vitals & Examination", lblBP: "Blood Pressure (mmHg)", lblPulse: "Pulse Rate (bpm)", lblTemp: "Body Temp (°F)",
+                sec5Title: "Diagnosis & Treatment Plan", lblDiagnosis: "Provisional Diagnosis", phDiagnosis: "Primary diagnosis or differential options", lblPrescription: "Prescription / Recommended Therapy", phPrescription: "Medication dosage, duration, and instructions...", lblFollowup: "Follow-Up Date",
+                btnPrev: "Previous", btnNext: "Next", btnSave: "Save Summary", summaryTitle: "Case Record Summary",
+                botTitle: "MedAssist AI", botWelcome: "Hello! I'm your Clinical Intake Assistant. How can I help you take this case today?", chatPlaceholder: "Ask MedAssist...", chipVitals: "Vitals guide", chipAllergies: "Allergy list", chipComplaint: "Chief complaint",
+                sumId: "Aadhaar ID", sumPhone: "Phone", sumEmail: "Email", sumPatient: "Patient Info", sumVitals: "Vitals", sumComplaint: "Chief Complaint", sumAllergies: "Allergies", sumDiagnosis: "Diagnosis", sumPrescription: "Prescription / Plan"
+            },
+            hi: {
+                nav1: "1. पंजीकरण", nav2: "2. जनसांख्यिकी", nav3: "3. मुख्य शिकायत", nav4: "4. नैदानिक लक्षण (Vitals)", nav5: "5. निदान और योजना", nav6: "6. मामला सारांश",
+                pageTitle: "मरीज़ केस लेने का मॉड्यूल", pageSubtitle: "व्यापक रोगी पंजीकरण, नैदानिक निष्कर्ष और चिकित्सा इतिहास दर्ज करें।",
+                sec1Title: "रोगी पंजीकरण और सत्यापन", lblAadhar: "आधार / राष्ट्रीय पहचान संख्या", phAadhar: "उदा. 1234 5678 9012", lblPhone: "फ़ोन नंबर", phPhone: "उदा. 9876543210", lblEmail: "ईमेल पता", phEmail: "उदा. patient@example.com",
+                sec2Title: "रोगी जनसांख्यिकी", lblName: "पूरा नाम", phName: "उदा. सीमा शर्मा", lblAge: "आयु", phAge: "उदा. 32", lblGender: "लिंग", optGenderDefault: "लिंग चुनें", optFemale: "महिला", optMale: "पुरुष", optOther: "अन्य", lblAddress: "पता / स्थान", phAddress: "उदा. शहर, राज्य",
+                sec3Title: "मुख्य शिकायत और चिकित्सा इतिहास", lblComplaint: "प्राथमिक लक्षण / आने का कारण", phComplaint: "प्राथमिक समस्या, शुरुआत और अवधि का वर्णन करें...", lblHasAllergy: "क्या रोगी को कोई ज्ञात एलर्जी है?", optNo: "नहीं", optYes: "हाँ", lblAllergyDetails: "एलर्जी निर्दिष्ट करें (भोजन, दवा, पर्यावरण)", phAllergies: "विशिष्ट एलर्जी ट्रिगर और प्रतिक्रियाएं लिखें...", lblPastHistory: "चिकित्सा और सर्जिकल इतिहास", phPastHistory: "पिछली बीमारियाँ, सर्जरी, पुरानी स्थितियाँ...",
+                sec4Title: "वाइटल्स और परीक्षण", lblBP: "रक्तचाप (mmHg)", lblPulse: "पल्स रेट (bpm)", lblTemp: "शरीर का तापमान (°F)",
+                sec5Title: "निदान और उपचार योजना", lblDiagnosis: "अनंतिम निदान (Diagnosis)", phDiagnosis: "प्राथमिक निदान या विकल्प", lblPrescription: "प्रिस्क्रिप्शन / अनुशंसित थेरेपी", phPrescription: "दवा की खुराक, अवधि और निर्देश...", lblFollowup: "अनुवर्ती (Follow-Up) तिथि",
+                btnPrev: "पिछला", btnNext: "अगला", btnSave: "सारांश सहेजें", summaryTitle: "केस रिकॉर्ड सारांश",
+                botTitle: "MedAssist एआई", botWelcome: "नमस्ते! मैं आपका क्लिनिकल असिस्टेंट हूँ। आज केस दर्ज करने में कैसे मदद कर सकता हूँ?", chatPlaceholder: "MedAssist से पूछें...", chipVitals: "वाइटल्स गाइड", chipAllergies: "एलर्जी सूची", chipComplaint: "मुख्य शिकायत",
+                sumId: "आधार आईडी", sumPhone: "फ़ोन", sumEmail: "ईमेल", sumPatient: "रोगी विवरण", sumVitals: "वाइटल्स", sumComplaint: "मुख्य शिकायत", sumAllergies: "एलर्जी", sumDiagnosis: "निदान", sumPrescription: "प्रिस्क्रिप्शन / योजना"
+            },
+            bn: {
+                nav1: "১. নিবন্ধন", nav2: "২. জনমিতি", nav3: "৩. প্রধান সমস্যা", nav4: "৪. ক্লিনিকাল ভাইটাল", nav5: "৫. ডায়াগনোসিস ও প্ল্যান", nav6: "৬. কেস সামারি",
+                pageTitle: "রোগীর কেস হিস্ট্রি মডিউল", pageSubtitle: "রোগীর নিবন্ধন, ক্লিনিকাল পর্যবেক্ষণ এবং চিকিৎসার ইতিহাস সংগ্রহ করুন।",
+                sec1Title: "রোগীর নিবন্ধন ও যাচাইকরণ", lblAadhar: "आधार / জাতীয় পরিচয়পত্র নম্বর", phAadhar: "যেমন ১২৩৪ ৫৬৭৮ ৯০১২", lblPhone: "ফোন নম্বর", phPhone: "যেমন ৯৮৭৬৫ND৩২১০", lblEmail: "ইমেল ঠিকানা", phEmail: "যেমন patient@example.com",
+                sec2Title: "রোগীর জনমিতিক তথ্য", lblName: "সম্পূর্ণ নাম", phName: "যেমন রহিমা বেগম", lblAge: "বয়স", phAge: "যেমন ৩২", lblGender: "লিঙ্গ", optGenderDefault: "লিঙ্গ নির্বাচন করুন", optFemale: "মহিলা", optMale: "পুরুষ", optOther: "অন্যান্য", lblAddress: "ঠিকানা / অবস্থান", phAddress: "যেমন শহর, জেলা",
+                sec3Title: "প্রধান সমস্যা ও চিকিৎসার ইতিহাস", lblComplaint: "প্রধান উপসর্গ / আসার কারণ", phComplaint: "প্রধান সমস্যা এবং কতদিন ধরে তা বর্ণনা করুন...", lblHasAllergy: "রোগীর কি কোনো অ্যালার্জি আছে?", optNo: "না", optYes: "হ্যাঁ", lblAllergyDetails: "অ্যালার্জির বিবরণ (খাবার, ওষুধ, পরিবেশ)", phAllergies: "অ্যালার্জির মূল কারণ ও প্রতিক্রিয়া লিখুন...", lblPastHistory: "পূর্ববর্তী অসুস্থতা ও অস্ত্রোপচারের ইতিহাস", phPastHistory: "আগের রোগ, সার্জারি বা দীর্ঘস্থায়ী সমস্যা...",
+                sec4Title: "ভাইটাল ও পরীক্ষা", lblBP: "রক্তচাপ (mmHg)", lblPulse: "পালস রেট (bpm)", lblTemp: "শরীরের তাপমাত্রা (°F)",
+                sec5Title: "ডায়াগনোসিস ও চিকিৎসা পরিকল্পনা", lblDiagnosis: "প্রাথমিক ডায়াগনোসিস", phDiagnosis: "মূল রোগ বা সাম্ভাব্য কারণ", lblPrescription: "প্রেসক্রিপশন / ওষুধপত্র", phPrescription: "ওষুধের নাম, মাত্রা ও সেবনবিধি...", lblFollowup: "ফলো-আপের তারিখ",
+                btnPrev: "পূর্ববর্তী", btnNext: "পরবর্তী", btnSave: "সংরক্ষণ করুন", summaryTitle: "কেস রেকর্ড সামারি",
+                botTitle: "MedAssist এআই", botWelcome: "হ্যালো! আমি আপনার ক্লিনিকাল সহকারী। আজ আপনাকে কীভাবে সাহায্য করতে পারি?", chatPlaceholder: "MedAssist-কে জিজ্ঞাসা করুন...", chipVitals: "ভাইটাল গাইড", chipAllergies: "অ্যালার্জি তালিকা", chipComplaint: "প্রধান সমস্যা",
+                sumId: "আইডি নম্বর", sumPhone: "ফোন", sumEmail: "ইমেল", sumPatient: "রোগীর তথ্য", sumVitals: "ভাইটালস", sumComplaint: "প্রধান সমস্যা", sumAllergies: "অ্যালার্জি", sumDiagnosis: "ডায়াগনোসিস", sumPrescription: "প্রেসক্রিপশন"
+            },
+            te: {
+                nav1: "1. నమోదు", nav2: "2. జనాభా వివరాలు", nav3: "3. ప్రధాన ఫిర్యాదు", nav4: "4. క్లినికల్ వైటల్స్", nav5: "5. నిర్ధారణ & ప్రణాళిక", nav6: "6. కేస్ సారాంశం",
+                pageTitle: "పేషెంట్ కేస్ టేకింగ్ మాడ్యూల్", pageSubtitle: "రోగి నమోదు, వైద్య పరిశోధనలు మరియు వివరాలను రికార్డ్ చేయండి.",
+                sec1Title: "రోగి నమోదు మరియు ధృవీకరణ", lblAadhar: "ఆధార్ / జాతీయ ఐడీ సంఖ్య", phAadhar: "ఉదా. 1234 5678 9012", lblPhone: "ఫోన్ నంబర్", phPhone: "ఉదా. 9876543210", lblEmail: "ఇమెయిల్ చిరునామా", phEmail: "ఉదా. patient@example.com",
+                sec2Title: "రోగి జనాభా వివరాలు", lblName: "పూర్తి పేరు", phName: "ఉదా. రావు", lblAge: "వయస్సు", phAge: "ఉదా. 32", lblGender: "లింగం", optGenderDefault: "లింగాన్ని ఎంచుకోండి", optFemale: "స్త్రీ", optMale: "పురుషుడు", optOther: "ఇతర", lblAddress: "చిరునామా / ప్రాంతం", phAddress: "ఉదా. నగరం, రాష్ట్రం",
+                sec3Title: "ప్రధాన ఫిర్యాదు & వైద్య చరిత్ర", lblComplaint: "ప్రాథమిక లక్షణాలు / సందర్శనకు కారణం", phComplaint: "ప్రధాన సమస్య మరియు వ్యవధిని వివరించండి...", lblHasAllergy: "రోగికి ఏవైనా అలెర్జీలు ఉన్నాయా?", optNo: "లేవు", optYes: "అవును", lblAllergyDetails: "అలెర్జీల వివరాలు (ఆహారం, మందులు, పర్యావరణం)", phAllergies: "అలెర్జీ కారకాలను వివరంగా రాయండి...", lblPastHistory: "గత వైద్య & శస్త్రచికిత్స చరిత్ర", phPastHistory: "మునుపటి అనారోగ్యాలు, శస్త్రచికిత్సలు...",
+                sec4Title: "వైటల్స్ & పరీక్ష", lblBP: "రక్తపోటు (mmHg)", lblPulse: "పల్స్ రేటు (bpm)", lblTemp: "శరీర ఉష్ణోగ్రత (°F)",
+                sec5Title: "నిర్ధారణ & చికిత్స ప్రణాళిక", lblDiagnosis: "తాత్కాలిక నిర్ధారణ", phDiagnosis: "ప్రాథమిక రోగ నిర్ధారణ", lblPrescription: "మందుల వివరాలు / ప్రిస్క్రిప్షన్", phPrescription: "మందుల మోతాదు మరియు సూచనలు...", lblFollowup: "తరువాతి తనిఖీ తేదీ",
+                btnPrev: "మునుపటి", btnNext: "తరువాత", btnSave: "సారాంశాన్ని సేవ్ చేయి", summaryTitle: "కేస్ రికార్డ్ సారాంశం",
+                botTitle: "MedAssist AI", botWelcome: "నమస్తే! నేను మీ క్లినికల్ అసిస్టెంట్‌ని. ఈ రోజు మీకు ఎలా సహాయపడగలను?", chatPlaceholder: "MedAssist ని అడగండి...", chipVitals: "వైటల్స్ గైడ్", chipAllergies: "అలెర్జీల జాబితా", chipComplaint: "ప్రధాన ఫిర్యాదు",
+                sumId: "ఐడీ సంఖ్య", sumPhone: "ఫోన్", sumEmail: "ఇమెయిల్", sumPatient: "రోగి సమాచారం", sumVitals: "వైటల్స్", sumComplaint: "ప్రధాన ఫిర్యాదు", sumAllergies: "అలెర్జీలు", sumDiagnosis: "నిర్ధారణ", sumPrescription: "మందుల వివరాలు"
+            },
+            ta: {
+                nav1: "1. பதிவு", nav2: "2. விவரங்கள்", nav3: "3. முதன்மை குறைபாடு", nav4: "4. முக்கிய அளவீடுகள்", nav5: "5. நோய் கணிப்பு & திட்டம்", nav6: "6. வழக்கு சுருக்கம்",
+                pageTitle: "நோயாளி விவர சேகரிப்பு தொகுதி", pageSubtitle: "நோயாளியின் பதிவு, மருத்துவ அவதானிப்புகள் மற்றும் வரலாற்றை பதிவு செய்யவும்.",
+                sec1Title: "நோயாளி பதிவு மற்றும் சரிபார்ப்பு", lblAadhar: "ஆதார் / தேசிய அடையாள எண்", phAadhar: "எ.கா. 1234 5678 9012", lblPhone: "தொலைபேசி எண்", phPhone: "எ.கா. 9876543210", lblEmail: "மின்னஞ்சல் முகவரி", phEmail: "எ.கா. patient@example.com",
+                sec2Title: "நோயாளி விவரங்கள்", lblName: "முழு பெயர்", phName: "எ.கா. கார்த்திக்", lblAge: "வயது", phAge: "எ.கா. 32", lblGender: "பாலினம்", optGenderDefault: "பாலினம் தேர்ந்தெடுக்கவும்", optFemale: "பெண்", optMale: "ஆண்", optOther: "இதர", lblAddress: "முகவரி / இருப்பிடம்", phAddress: "எ.கா. நகரம், மாநிலம்",
+                sec3Title: "முதன்மை குறைபாடு & மருத்துவ வரலாறு", lblComplaint: "முதன்மை அறிகுறிகள் / வருகைக்கான காரணம்", phComplaint: "பிரச்சனை மற்றும் அதன் கால அளவை விளக்கவும்...", lblHasAllergy: "நோயாளிக்கு ஏதேனும் ஒவ்வாமை (Allergy) உள்ளதா?", optNo: "இல்லை", optYes: "ஆம்", lblAllergyDetails: "ஒவ்வாமைகளை குறிப்பிடவும் (உணவு, மருந்து)", phAllergies: "ஒவ்வாமைக்கான காரணங்களை எழுதவும்...", lblPastHistory: "முந்தைய மருத்துவ & அறுவை சிகிச்சை வரலாறு", phPastHistory: "முந்தைய நோய்கள், அறுவை சிகிச்சைகள்...",
+                sec4Title: "உடல் அளவீடுகள் & பரிசோதனை", lblBP: "இரத்த அழுத்தம் (mmHg)", lblPulse: "நாடித் துடிப்பு (bpm)", lblTemp: "உடல் வெப்பநிலை (°F)",
+                sec5Title: "நோய் கணிப்பு & சிகிச்சை திட்டம்", lblDiagnosis: "தற்காலிக நோய் கணிப்பு", phDiagnosis: "முதன்மை நோய் கணிப்பு", lblPrescription: "மருந்துச் சீட்டு / சிகிச்சை முறை", phPrescription: "மருந்துகளின் அளவு மற்றும் அறிவுறுத்தல்கள்...", lblFollowup: "அடுத்த வருகை தேதி",
+                btnPrev: "முந்தைய", btnNext: "அடுத்தது", btnSave: "சுருக்கத்தைச் சேமி", summaryTitle: "வழக்கு பதிவு சுருக்கம்",
+                botTitle: "MedAssist AI", botWelcome: "வணக்கம்! நான் உங்கள் மருத்துவ உதவியாளர். இன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?", chatPlaceholder: "MedAssist-யிடம் கேட்கவும்...", chipVitals: "அளவீடுகள் வழிகாட்டி", chipAllergies: "ஒவ்வாமை பட்டியல்", chipComplaint: "முதன்மை குறைபாடு",
+                sumId: "அடையாள எண்", sumPhone: "தொலைபேசி", sumEmail: "மின்னஞ்சல்", sumPatient: "நோயாளி விவரம்", sumVitals: "அளவீடுகள்", sumComplaint: "முதன்மை குறைபாடு", sumAllergies: "ஒவ்வாமை", sumDiagnosis: "நோய் கணிப்பு", sumPrescription: "மருந்துச் சீட்டு"
+            },
+            mr: {
+                nav1: "1. नोंदणी", nav2: "2. लोकसंख्याशास्त्र", nav3: "3. मुख्य तक्रार", nav4: "4. क्लिनिकल वाइटल्स", nav5: "5. निदान आणि योजना", nav6: "6. केस सारांश",
+                pageTitle: "रुग्ण केस घेण्याचे मॉड्युल", pageSubtitle: "सर्वसमावेशक रुग्ण नोंदणी, क्लिनिकल निष्कर्ष आणि वैद्यकीय इतिहास नोंदवा.",
+                sec1Title: "रुग्ण नोंदणी आणि पडताळणी", lblAadhar: "आधार / राष्ट्रीय ओळख क्रमांक", phAadhar: "उदा. 1234 5678 9012", lblPhone: "फोन नंबर", phPhone: "उदा. 9876543210", lblEmail: "ईमेल पत्ता", phEmail: "उदा. patient@example.com",
+                sec2Title: "रुग्ण लोकसंख्याशास्त्र", lblName: "पूर्ण नाव", phName: "उदा. राहुल पाटील", lblAge: "वय", phAge: "उदा. 32", lblGender: "लिंग", optGenderDefault: "लिंग निवडा", optFemale: "स्त्री", optMale: "पुरुष", optOther: "इतर", lblAddress: "पत्ता / ठिकाण", phAddress: "उदा. शहर, राज्य",
+                sec3Title: "मुख्य तक्रार आणि वैद्यकीय इतिहास", lblComplaint: "प्राथमिक लक्षणे / येण्याचे कारण", phComplaint: "मुख्य समस्या आणि कालावधीचे वर्णन करा...", lblHasAllergy: "रुग्णाला कोणतीही ॲलर्जी आहे का?", optNo: "नाही", optYes: "होय", lblAllergyDetails: "ॲलर्जी निर्दिष्ट करा (अन्न, औषध, पर्यावरण)", phAllergies: "विशिष्ट ॲलर्जीचे घटक लिहा...", lblPastHistory: "वैद्यकीय आणि शस्त्रक्रिया इतिहास", phPastHistory: "मागील आजार, शस्त्रक्रिया, जुनाट आजार...",
+                sec4Title: "वाइटल्स आणि तपासणी", lblBP: "रक्तदाब (mmHg)", lblPulse: "पल्स रेट (bpm)", lblTemp: "शरीराचे तापमान (°F)",
+                sec5Title: "निदान आणि उपचार योजना", lblDiagnosis: "तात्पुरते निदान (Diagnosis)", phDiagnosis: "प्राथमिक निदान पर्याय", lblPrescription: "प्रिस्क्रिप्शन / औषधोपचार", phPrescription: "औषधांचा डोस, कालावधी आणि सूचना...", lblFollowup: "फॉलो-अप तारीख",
+                btnPrev: "मागे", btnNext: "पुढे", btnSave: "सारांश जतन करा", summaryTitle: "केस रेकॉर्ड सारांश",
+                botTitle: "MedAssist AI", botWelcome: "नमस्कार! मी तुमचा क्लिनिकल असिस्टंट आहे. आज केस घेण्यास कशी मदत करू?", chatPlaceholder: "MedAssist ला विचारा...", chipVitals: "वाइटल्स मार्गदर्शक", chipAllergies: "ॲलर्जी सूची", chipComplaint: "मुख्य तक्रार",
+                sumId: "आधार ओळख", sumPhone: "फोन", sumEmail: "ईमेल", sumPatient: "रुग्ण माहिती", sumVitals: "वाइटल्स", sumComplaint: "मुख्य तक्रार", sumAllergies: "ॲलर्जी", sumDiagnosis: "निदान", sumPrescription: "प्रिस्क्रिप्शन"
+            },
+            gu: {
+                nav1: "1. નોંધણી", nav2: "2. વસ્તી વિષયક વિગતો", nav3: "3. મુખ્ય ફરિયાદ", nav4: "4. ક્લિનિકલ વાઇટલ્સ", nav5: "5. નિદાન અને યોજના", nav6: "6. કેસ સારાંશ",
+                pageTitle: "દર્દી કેસ હિસ્ટ્રી મોડ્યુલ", pageSubtitle: "વ્યાપક દર્દી નોંધણી, ક્લિનિકલ તારણો અને તબીબી ઇતિહાસ રેકોર્ડ કરો.",
+                sec1Title: "દર્દી નોંધણી અને ચકાસણી", lblAadhar: "આધાર / રાષ્ટ્રીય ઓળખ નંબર", phAadhar: "દા.ત. 1234 5678 9012", lblPhone: "ફોન નંબર", phPhone: "દા.ત. 9876543210", lblEmail: "ઇમેઇલ સરનામું", phEmail: "દા.ત. patient@example.com",
+                sec2Title: "દર્દી વિગતો", lblName: "પૂરું નામ", phName: "દા.ત. અમિત શાહ", lblAge: "ઉંમર", phAge: "દા.ત. 32", lblGender: "જિન્ડર", optGenderDefault: "જિન્ડર પસંદ કરો", optFemale: "મહિલા", optMale: "પુરુષ", optOther: "અન્ય", lblAddress: "સરનામું / સ્થાન", phAddress: "દા.ત. શહેર, રાજ્ય",
+                sec3Title: "મુખ્ય ફરિયાદ અને તબીબી ઇતિહાસ", lblComplaint: "પ્રાથમિક લક્ષણો / મુલાકાતનું કારણ", phComplaint: "મુખ્ય સમસ્યા અને સમયગાળાનું વર્ણન કરો...", lblHasAllergy: "શું દર્દીને કોઈ એલર્જી છે?", optNo: "ના", optYes: "હા", lblAllergyDetails: "એલર્જીની વિગતો (ખોરાક, દવા, પર્યાવરણ)", phAllergies: "ચોક્કસ એલર્જીના કારણો લખો...", lblPastHistory: "તબીબી અને સર્જિકલ ઇતિહાસ", phPastHistory: "અગાઉની બીમારીઓ, સર્જરીઓ...",
+                sec4Title: "વાઇટલ્સ અને તપાસ", lblBP: "બ્લડ પ્રેશર (mmHg)", lblPulse: "પલ્સ રેટ (bpm)", lblTemp: "શરીરનું તાપમાન (°F)",
+                sec5Title: "નિદાન અને સારવાર યોજના", lblDiagnosis: "કાચું નિદાન (Diagnosis)", phDiagnosis: "પ્રાથમિક નિદાન વિકલ્પો", lblPrescription: "પ્રિસ્ક્રિપ્શન / દવાઓ", phPrescription: "દવાનો ડોઝ, સમયગાળો અને સૂચનાઓ...", lblFollowup: "ફોલો-અપ તારીખ",
+                btnPrev: "પાછળ", btnNext: "આગળ", btnSave: "સારાંશ સાચવો", summaryTitle: "કેસ રેકોર્ડ સારાંશ",
+                botTitle: "MedAssist AI", botWelcome: "નમસ્તે! હું તમારો ક્લિનિકલ આસિસ્ટન્ટ છું. આજે કેસ હિસ્ટ્રી લેવામાં કેવી રીતે મદદ કરું?", chatPlaceholder: "MedAssist ને પૂછો...", chipVitals: "વાઇટલ્સ ગાઇડ", chipAllergies: "એલર્જી સૂચિ", chipComplaint: "મુખ્ય ફરિયાદ",
+                sumId: "આધાર આઈડી", sumPhone: "ફોન", sumEmail: "ઇમેઇલ", sumPatient: "દર્દીની માહિતી", sumVitals: "વાઇટલ્સ", sumComplaint: "મુખ્ય ફરિયાદ", sumAllergies: "એલર્જી", sumDiagnosis: "નિદાન", sumPrescription: "પ્રિસ્ક્રિપ્શન"
+            },
+            es: {
+                nav1: "1. Registro", nav2: "2. Demografía", nav3: "3. Queja Principal", nav4: "4. Signos Vitales", nav5: "5. Diagnóstico y Plan", nav6: "6. Resumen",
+                pageTitle: "Módulo de Historia Clínica del Paciente", pageSubtitle: "Registre datos del paciente, hallazgos clínicos e historial médico.",
+                sec1Title: "Registro y Verificación del Paciente", lblAadhar: "Número de Identificación Nacional / DNI", phAadhar: "ej. 1234 5678 9012", lblPhone: "Número de Teléfono", phPhone: "ej. 9876543210", lblEmail: "Correo Electrónico", phEmail: "ej. paciente@ejemplo.com",
+                sec2Title: "Datos Demográficos", lblName: "Nombre Completo", phName: "ej. María García", lblAge: "Edad", phAge: "ej. 32", lblGender: "Género", optGenderDefault: "Seleccionar Género", optFemale: "Femenino", optMale: "Masculino", optOther: "Otro", lblAddress: "Dirección / Ubicación", phAddress: "ej. Ciudad, Estado",
+                sec3Title: "Queja Principal e Historial Médico", lblComplaint: "Síntomas Principales / Motivo de Consulta", phComplaint: "Describa el problema principal, inicio y duración...", lblHasAllergy: "¿El paciente tiene alguna alergia conocida?", optNo: "No", optYes: "Sí", lblAllergyDetails: "Especificar Alergias (Alimentos, Medicamentos, Ambiental)", phAllergies: "Liste los desencadenantes y reacciones...", lblPastHistory: "Historial Médico y Quirúrgico", phPastHistory: "Enfermedades previas, cirugías, condiciones crónicas...",
+                sec4Title: "Signos Vitales y Examen", lblBP: "Presión Arterial (mmHg)", lblPulse: "Frecuencia Cardíaca (bpm)", lblTemp: "Temperatura Corporal (°F)",
+                sec5Title: "Diagnóstico y Plan de Tratamiento", lblDiagnosis: "Diagnóstico Presuntivo", phDiagnosis: "Diagnóstico principal o diferenciales", lblPrescription: "Prescripción / Tratamiento Recomendado", phPrescription: "Dosis de medicamentos, duración e instrucciones...", lblFollowup: "Fecha de Seguimiento",
+                btnPrev: "Anterior", btnNext: "Siguiente", btnSave: "Guardar Resumen", summaryTitle: "Resumen del Registro del Caso",
+                botTitle: "MedAssist IA", botWelcome: "¡Hola! Soy su asistente clínico. ¿Cómo puedo ayudarle a tomar este caso hoy?", chatPlaceholder: "Pregunte a MedAssist...", chipVitals: "Guía de vitales", chipAllergies: "Lista de alergias", chipComplaint: "Queja principal",
+                sumId: "ID Nacional", sumPhone: "Teléfono", sumEmail: "Correo", sumPatient: "Info Paciente", sumVitals: "Vitales", sumComplaint: "Queja Principal", sumAllergies: "Alergias", sumDiagnosis: "Diagnóstico", sumPrescription: "Prescripción / Plan"
+            }
+        };
+
+        let currentLang = 'en';
+        const sections = ['registration', 'demographics', 'complaint', 'vitals', 'treatment', 'summary', 'success', 'records'];
+        let currentSectionIndex = 0;
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            return el ? el.value.trim() : '';
+        }
+
+        function changeLanguage(langCode) {
+            currentLang = langCode;
+            const dict = translations[langCode] || translations['en'];
+
+            document.querySelectorAll('[data-i18n]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n');
+                if (dict[key]) elem.textContent = dict[key];
+            });
+
+            document.querySelectorAll('[data-i18n-ph]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n-ph');
+                if (dict[key]) elem.placeholder = dict[key];
+            });
+
+            const summaryCard = document.getElementById('summaryCard');
+            if (summaryCard && summaryCard.style.display === 'block') {
+                generateCaseSummary();
+            }
+        }
+
+        function switchSection(sectionId, element) {
+            document.querySelectorAll('.form-section').forEach(sec => {
+                sec.classList.remove('active');
+                sec.style.display = 'none';
+            });
+            
+            const summaryCard = document.getElementById('summaryCard');
+            if (summaryCard) summaryCard.style.display = 'none';
+
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+
+            // Control Navigation Button Row Visibility
+            const navRow = document.getElementById('navButtonsRow');
+            const completeBtn = document.getElementById('btnCompleteSubmit');
+
+            if (sectionId === 'summary') {
+                generateCaseSummary();
+                if (navRow) navRow.style.display = 'flex';
+                if (completeBtn) completeBtn.style.display = 'inline-block';
+            } else if (sectionId === 'success' || sectionId === 'records') {
+                if (navRow) navRow.style.display = 'none';
+                const targetSec = document.getElementById(`sec-${sectionId}`);
+                if (targetSec) {
+                    targetSec.classList.add('active');
+                    targetSec.style.display = 'block';
+                }
+            } else {
+                if (navRow) navRow.style.display = 'flex';
+                if (completeBtn) completeBtn.style.display = 'none';
+                const targetSec = document.getElementById(`sec-${sectionId}`);
+                if (targetSec) {
+                    targetSec.classList.add('active');
+                    targetSec.style.display = 'block';
+                }
+            }
+
+            if (element) {
+                element.classList.add('active');
+            } else {
+                const navLinks = document.querySelectorAll('.nav-link');
+                const index = sections.indexOf(sectionId);
+                if (navLinks[index] && index < 6) navLinks[index].classList.add('active');
+            }
+
+            currentSectionIndex = sections.indexOf(sectionId);
+        }
+
+        function navigateForm(direction) {
+            let newIndex = currentSectionIndex + direction;
+            if (newIndex >= 0 && newIndex < 6) {
+                switchSection(sections[newIndex], null);
+            }
+        }
+
+        function toggleAllergyField(val) {
+            const allergyBox = document.getElementById('allergyDetailsContainer');
+            if (!allergyBox) return;
+            if (val === 'Yes') {
+                allergyBox.style.display = 'block';
+            } else {
+                allergyBox.style.display = 'none';
+                const el = document.getElementById('allergyDetails');
+                if (el) el.value = '';
+            }
+        }
+
+        function generateCaseSummary() {
+            const dict = translations[currentLang] || translations['en'];
+
+            const aadhar = getValue('aadhar');
+            const phone = getValue('regPhone');
+            const email = getValue('email');
+            const name = getValue('fullName');
+            const age = getValue('age');
+            const gender = getValue('gender');
+            const complaint = getValue('complaint');
+            const hasAllergy = getValue('hasAllergy');
+            const allergyDetails = getValue('allergyDetails');
+            const diagnosis = getValue('diagnosis');
+            const prescription = getValue('prescription');
+            const bp = getValue('bp') || 'N/A';
+            const pulse = getValue('pulse') || 'N/A';
+
+            if (!aadhar || !phone || !name || !complaint) {
+                alert('Please fill in required fields: National ID, Phone Number, Patient Name, and Chief Complaint.');
+                switchSection(!aadhar || !phone ? 'registration' : (!name ? 'demographics' : 'complaint'), null);
+                return;
+            }
+
+            // Save record locally in browser
+            const patientRecord = {
+                id: Date.now(),
+                phone: phone,
+                email: email,
+                name: name,
+                age: age,
+                gender: gender,
+                complaint: complaint,
+                hasAllergy: hasAllergy,
+                allergyDetails: allergyDetails,
+                diagnosis: diagnosis,
+                prescription: prescription,
+                bp: bp,
+                pulse: pulse,
+                timestamp: new Date().toLocaleString()
+            };
+
+            let existingRecords = JSON.parse(localStorage.getItem('patientRecords') || '[]');
+            existingRecords.push(patientRecord);
+            localStorage.setItem('patientRecords', JSON.stringify(existingRecords));
+
+            const allergyText = hasAllergy === 'Yes' ? (allergyDetails || 'Yes (Unspecified)') : 'None reported';
+
+            const summaryHTML = `
+                <p><strong>${dict.sumId}:</strong> [Aadhaar Omitted] | <strong>${dict.sumPhone}:</strong> ${phone} | <strong>${dict.sumEmail}:</strong> ${email || 'N/A'}</p>
+                <p><strong>${dict.sumPatient}:</strong> ${name} (${age || 'N/A'} yrs, ${gender || 'N/A'})</p>
+                <p><strong>${dict.sumVitals}:</strong> BP: ${bp} | Pulse: ${pulse} bpm</p>
+                <p><strong>${dict.sumComplaint}:</strong> ${complaint}</p>
+                <p><strong>${dict.sumAllergies}:</strong> ${allergyText}</p>
+                <p><strong>${dict.sumDiagnosis}:</strong> ${diagnosis || 'Pending'}</p>
+                <p><strong>${dict.sumPrescription}:</strong> ${prescription || 'None noted'}</p>
+                <p style="color: var(--success); font-weight: bold; margin-top: 10px;">✓ Record Saved to Local Storage</p>
+            `;
+
+            const summaryContent = document.getElementById('summaryContent');
+            if (summaryContent) summaryContent.innerHTML = summaryHTML;
+
+            document.querySelectorAll('.form-section').forEach(sec => {
+                sec.classList.remove('active');
+                sec.style.display = 'none';
+            });
+
+            const summaryCard = document.getElementById('summaryCard');
+            if (summaryCard) summaryCard.style.display = 'block';
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            if (navLinks[5]) navLinks[5].classList.add('active');
+
+            currentSectionIndex = 5;
+        }
+
+        function submitCase() {
+            const summaryCard = document.getElementById('summaryCard');
+            if (summaryCard) summaryCard.style.display = 'none';
+
+            document.querySelectorAll('.form-section').forEach(sec => {
+                sec.classList.remove('active');
+                sec.style.display = 'none';
+            });
+
+            const successSec = document.getElementById('sec-success');
+            if (successSec) {
+                successSec.classList.add('active');
+                successSec.style.display = 'block';
+            }
+
+            const navRow = document.getElementById('navButtonsRow');
+            if (navRow) navRow.style.display = 'none';
+
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            currentSectionIndex = 6;
+        }
+
+        function resetForm() {
+            document.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.type !== 'button' && field.type !== 'submit') {
+                    field.value = '';
+                }
+            });
+
+            const allergyBox = document.getElementById('allergyDetailsContainer');
+            if (allergyBox) allergyBox.style.display = 'none';
+
+            switchSection('registration', null);
+        }
+
+        function showSavedRecords() {
+            document.querySelectorAll('.form-section').forEach(sec => {
+                sec.classList.remove('active');
+                sec.style.display = 'none';
+            });
+
+            const summaryCard = document.getElementById('summaryCard');
+            if (summaryCard) summaryCard.style.display = 'none';
+
+            const recordsSec = document.getElementById('sec-records');
+            if (recordsSec) {
+                recordsSec.classList.add('active');
+                recordsSec.style.display = 'block';
+            }
+
+            const navRow = document.getElementById('navButtonsRow');
+            if (navRow) navRow.style.display = 'none';
+
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+
+            const records = JSON.parse(localStorage.getItem('patientRecords') || '[]');
+            const container = document.getElementById('recordsListContainer');
+
+            if (!container) return;
+
+            if (records.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 20px;">No patient records found in storage.</p>';
+                return;
+            }
+
+            let cardsHTML = '';
+            records.slice().reverse().forEach(rec => {
+                cardsHTML += `
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 18px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 12px;">
+                            <strong>Patient: ${rec.name || 'N/A'} (${rec.age || 'N/A'} yrs, ${rec.gender || 'N/A'})</strong>
+                            <span style="color: var(--text-muted); font-size: 12px;">Saved: ${rec.timestamp || 'N/A'}</span>
+                        </div>
+                        <p style="margin: 4px 0; font-size: 14px;"><strong>Phone:</strong> ${rec.phone || 'N/A'} | <strong>Email:</strong> ${rec.email || 'N/A'}</p>
+                        <p style="margin: 4px 0; font-size: 14px;"><strong>Vitals:</strong> BP: ${rec.bp || 'N/A'} | Pulse: ${rec.pulse || 'N/A'} bpm</p>
+                        <p style="margin: 4px 0; font-size: 14px;"><strong>Chief Complaint:</strong> ${rec.complaint || 'N/A'}</p>
+                        <p style="margin: 4px 0; font-size: 14px;"><strong>Allergies:</strong> ${rec.hasAllergy === 'Yes' ? (rec.allergyDetails || 'Yes') : 'None reported'}</p>
+                        <p style="margin: 4px 0; font-size: 14px;"><strong>Diagnosis:</strong> ${rec.diagnosis || 'Pending'}</p>
+                        <p style="margin: 4px 0; font-size: 14px;"><strong>Prescription:</strong> ${rec.prescription || 'None'}</p>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = cardsHTML;
+            currentSectionIndex = 7;
+        }
+
+        function clearAllRecords() {
+            if (confirm('Are you sure you want to delete all saved patient records from your browser?')) {
+                localStorage.removeItem('patientRecords');
+                showSavedRecords();
+            }
+        }
+
+        /* AI Chatbot Logic */
+        function toggleChatbot() {
+            const chatWin = document.getElementById('chatbotWindow');
+            if (!chatWin) return;
+
+            if (chatWin.style.display === 'flex') {
+                chatWin.style.display = 'none';
+            } else {
+                chatWin.style.display = 'flex';
+            }
+        }
+
+        function closeChatbot() {
+            const chatWin = document.getElementById('chatbotWindow');
+            if (chatWin) chatWin.style.display = 'none';
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') sendChatMessage();
+        }
+
+        function sendQuickMessage(text) {
+            const input = document.getElementById('chatInput');
+            if (input) {
+                input.value = text;
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            const inputField = document.getElementById('chatInput');
+            if (!inputField) return;
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            const messagesContainer = document.getElementById('chatMessages');
+            if (!messagesContainer) return;
+
+            const userMsgDiv = document.createElement('div');
+            userMsgDiv.className = 'chat-msg user';
+            userMsgDiv.textContent = message;
+            messagesContainer.appendChild(userMsgDiv);
+
+            inputField.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            setTimeout(() => {
+                const botMsgDiv = document.createElement('div');
+                botMsgDiv.className = 'chat-msg bot';
+                botMsgDiv.textContent = generateAIResponse(message);
+                messagesContainer.appendChild(botMsgDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 600);
+        }
+
+        function generateAIResponse(query) {
+            const q = query.toLowerCase();
+            if (q.includes('vital') || q.includes('bp') || q.includes('pulse')) {
+                return "Normal vitals range: BP ~ 120/80 mmHg, Pulse ~ 60-100 bpm, Temp ~ 98.6°F (37°C).";
+            } else if (q.includes('allergy') || q.includes('allergies')) {
+                return "Common allergy categories to check: Penicillin, NSAIDs, Sulfa drugs, Latex, Nuts, Dairy, or Environmental pollen.";
+            } else if (q.includes('complaint') || q.includes('symptom')) {
+                return "When taking a chief complaint, use SOCRATES: Site, Onset, Character, Radiation, Associations, Time course, Exacerbating/relieving factors, Severity.";
+            } else {
+                return "I'm here to assist with intake notes. Make sure to double-check vital signs and document any known drug allergies!";
+            }
+        }
+
+        // Attach event listeners on DOM Ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const closeBtn = document.getElementById('chatCloseBtn');
+            if (closeBtn) {
+                closeBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeChatbot();
+                };
+            }
+        });
+    </script>
+</body>
+</html>
