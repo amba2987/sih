@@ -1,2 +1,0 @@
-# sih
-sih project

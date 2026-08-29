@@ -821,6 +821,18 @@
             localStorage.setItem('patientRecords', JSON.stringify(existingRecords));
 
             const allergyText = hasAllergy === 'Yes' ? (allergyDetails || 'Yes (Unspecified)') : 'None reported';
+            
+            // Save this patient to the MySQL database via the backend API
+            const historyNotes = `Gender: ${gender || 'N/A'} | Phone: ${phone} | Email: ${email || 'N/A'} | Complaint: ${complaint} | Allergies: ${allergyText} | Diagnosis: ${diagnosis || 'Pending'} | Prescription: ${prescription || 'None'} | BP: ${bp} | Pulse: ${pulse}`;
+
+            fetch('http://localhost:3000/patients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, age: age, history: historyNotes })
+            })
+                .then(res => res.json())
+                .then(data => console.log('Saved to database:', data))
+                .catch(err => console.error('Could not save to database (is the server running?):', err));
 
             const summaryHTML = `
                 <p><strong>${dict.sumId}:</strong> [Aadhaar Omitted] | <strong>${dict.sumPhone}:</strong> ${phone} | <strong>${dict.sumEmail}:</strong> ${email || 'N/A'}</p>
@@ -974,44 +986,51 @@
             }
         }
 
-        function sendChatMessage() {
-            const inputField = document.getElementById('chatInput');
-            if (!inputField) return;
-            const message = inputField.value.trim();
-            if (!message) return;
+        let chatHistory = []; // keep conversation context
 
-            const messagesContainer = document.getElementById('chatMessages');
-            if (!messagesContainer) return;
+async function sendChatMessage() {
+    const inputField = document.getElementById('chatInput');
+    if (!inputField) return;
+    const message = inputField.value.trim();
+    if (!message) return;
 
-            const userMsgDiv = document.createElement('div');
-            userMsgDiv.className = 'chat-msg user';
-            userMsgDiv.textContent = message;
-            messagesContainer.appendChild(userMsgDiv);
+    const messagesContainer = document.getElementById('chatMessages');
+    if (!messagesContainer) return;
 
-            inputField.value = '';
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    const userMsgDiv = document.createElement('div');
+    userMsgDiv.className = 'chat-msg user';
+    userMsgDiv.textContent = message;
+    messagesContainer.appendChild(userMsgDiv);
 
-            setTimeout(() => {
-                const botMsgDiv = document.createElement('div');
-                botMsgDiv.className = 'chat-msg bot';
-                botMsgDiv.textContent = generateAIResponse(message);
-                messagesContainer.appendChild(botMsgDiv);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }, 600);
-        }
+    inputField.value = '';
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        function generateAIResponse(query) {
-            const q = query.toLowerCase();
-            if (q.includes('vital') || q.includes('bp') || q.includes('pulse')) {
-                return "Normal vitals range: BP ~ 120/80 mmHg, Pulse ~ 60-100 bpm, Temp ~ 98.6°F (37°C).";
-            } else if (q.includes('allergy') || q.includes('allergies')) {
-                return "Common allergy categories to check: Penicillin, NSAIDs, Sulfa drugs, Latex, Nuts, Dairy, or Environmental pollen.";
-            } else if (q.includes('complaint') || q.includes('symptom')) {
-                return "When taking a chief complaint, use SOCRATES: Site, Onset, Character, Radiation, Associations, Time course, Exacerbating/relieving factors, Severity.";
-            } else {
-                return "I'm here to assist with intake notes. Make sure to double-check vital signs and document any known drug allergies!";
-            }
-        }
+    // show a temporary "typing..." bubble
+    const botMsgDiv = document.createElement('div');
+    botMsgDiv.className = 'chat-msg bot';
+    botMsgDiv.textContent = '...';
+    messagesContainer.appendChild(botMsgDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    try {
+  const res = await fetch('http://localhost:3000/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, history: chatHistory })  // check this variable name matches yours
+  });
+  const data = await res.json();
+
+        botMsgDiv.textContent = data.reply;
+        chatHistory.push({ role: 'user', content: message });
+        chatHistory.push({ role: 'assistant', content: data.reply });
+    } catch (err) {
+        botMsgDiv.textContent = "Sorry, something went wrong reaching MedAssist.";
+        console.error(err);
+    }
+
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
 
         // Attach event listeners on DOM Ready
         document.addEventListener('DOMContentLoaded', () => {
