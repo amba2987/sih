@@ -81,6 +81,48 @@
             color: var(--white);
             font-weight: 600;
         }
+        .nav-list {
+    list-style: none;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-link::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #7c8db5;
+    flex-shrink: 0;
+}
+
+.nav-link.active::before {
+    background: #fff;
+}
+
+.nav-sub {
+    padding-left: 40px;
+    font-size: 14px;
+}
+
+.nav-sub::before {
+    width: 5px;
+    height: 5px;
+}
+
+.nav-group-heading {
+    padding: 14px 24px 4px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7c8db5;
+    cursor: default;
+}
 
         /* Main Content Container */
         .main-content {
@@ -179,6 +221,67 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
+        .scan-card {
+    border: 1.5px dashed #93c5fd;
+    border-radius: 14px;
+    background: #fff;
+    padding: 48px 40px;
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.scan-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #e8f0fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+}
+
+.scan-title {
+    margin: 0 0 10px 0;
+    font-size: 19px;
+    color: #0f172a;
+}
+
+.scan-subtitle {
+    margin: 0 0 28px 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.btn-upload, .btn-capture {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 12px;
+}
+
+.btn-upload {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+}
+.btn-upload:hover { background: #1d4ed8; }
+
+.btn-capture {
+    background: #fff;
+    color: #2563eb;
+    border: 1.5px solid #dbeafe;
+}
+.btn-capture:hover { background: #f0f6ff; }
 
         /* Buttons & Actions */
         .btn-group {
@@ -370,14 +473,18 @@
         <div class="sidebar-brand">
             <span>🏥 MedCase EHR</span>
         </div>
-        <ul class="nav-list">
-            <li class="nav-link active" onclick="switchSection('registration', this)" data-i18n="nav1">1. Registration</li>
-            <li class="nav-link" onclick="switchSection('demographics', this)" data-i18n="nav2">2. Demographics</li>
-            <li class="nav-link" onclick="switchSection('complaint', this)" data-i18n="nav3">3. Chief Complaint</li>
-            <li class="nav-link" onclick="switchSection('vitals', this)" data-i18n="nav4">4. Clinical Vitals</li>
-            <li class="nav-link" onclick="switchSection('treatment', this)" data-i18n="nav5">5. Diagnosis & Plan</li>
-            <li class="nav-link" onclick="switchSection('summary', this)" data-i18n="nav6">6. Case Summary</li>
-        </ul>
+       <ul class="nav-list">
+    <li class="nav-link active" onclick="switchSection('registration', this)" data-i18n="nav1">Registration</li>
+
+    <li class="nav-group-heading" data-i18n="navGroupId">Identification</li>
+    <li class="nav-link nav-sub" onclick="switchSection('demographics', this)" data-i18n="nav2">Demographics</li>
+    <li class="nav-link nav-sub" onclick="switchSection('complaint', this)" data-i18n="nav3">Chief Complaint</li>
+    <li class="nav-link nav-sub" onclick="switchSection('vitals', this)" data-i18n="nav4">Clinical Vitals</li>
+
+    <li class="nav-link" onclick="switchSection('scan', this)" data-i18n="navScan">Scan and Digitize</li>
+    <li class="nav-link" onclick="switchSection('treatment', this)" data-i18n="nav5">Diagnosis &amp; Plan</li>
+    <li class="nav-link" onclick="switchSection('summary', this)" data-i18n="nav6">Case Summary</li>
+</ul>
     </div>
 
     <!-- Main Content Area -->
@@ -489,6 +596,43 @@
                     </div>
                 </div>
             </div>
+            <div id="sec-scan" class="form-section" style="display:none;">
+    <div class="scan-card">
+        <div class="scan-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v12"></path>
+                <path d="M7 8l5-5 5 5"></path>
+                <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path>
+            </svg>
+        </div>
+        <h3 class="scan-title" data-i18n="scanTitle">Scan Past Prescriptions &amp; Lab Reports</h3>
+        <p class="scan-subtitle" data-i18n="scanSubtitle">
+            Supports photos of doctor prescriptions, blood tests
+            (CBC/Sugar/Lipid), and Ayurvedic slips.
+        </p>
+
+   <input type="file" id="scanFileInput" accept="image/*,.pdf" style="display:none;" onchange="handleFileSelected(event)">
+<input type="file" id="scanCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFileSelected(event)">
+   
+
+        <button class="btn-upload" onclick="document.getElementById('scanFileInput').click()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v12"></path>
+                <path d="M7 8l5-5 5 5"></path>
+                <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path>
+            </svg>
+            <span data-i18n="uploadBtn">Upload Document / PDF</span>
+        </button>
+
+        <button class="btn-capture" onclick="document.getElementById('scanCameraInput').click()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span data-i18n="captureBtn">Capture with Camera</span>
+        </button>
+    </div>
+</div>
 
             <!-- Step 5: Treatment -->
             <div id="sec-treatment" class="form-section">
@@ -681,7 +825,7 @@
         };
 
         let currentLang = 'en';
-        const sections = ['registration', 'demographics', 'complaint', 'vitals', 'treatment', 'summary', 'success', 'records'];
+        const sections = ['registration', 'demographics', 'complaint', 'vitals', 'scan', 'treatment', 'summary', 'success', 'records'];
         let currentSectionIndex = 0;
 
         function getValue(id) {
@@ -708,6 +852,40 @@
                 generateCaseSummary();
             }
         }
+        function handleFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const previewArea = document.getElementById('scanPreviewArea');
+    previewArea.innerHTML = '<p style="color:#64748b;font-size:14px;">Uploading...</p>';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('http://localhost:3000/scans/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        previewArea.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f0f6ff;border:1px solid #dbeafe;border-radius:10px;">
+                <span style="font-size:14px;color:#1e293b;">✅ ${data.filename}</span>
+                <button onclick="clearScanFile()" style="border:none;background:none;color:#ef4444;cursor:pointer;font-weight:600;">Remove</button>
+            </div>
+        `;
+    })
+    .catch(err => {
+        console.error('Upload failed:', err);
+        previewArea.innerHTML = '<p style="color:#ef4444;font-size:14px;">Upload failed. Try again.</p>';
+    });
+}
+
+function clearScanFile() {
+    document.getElementById('scanPreviewArea').innerHTML = '';
+    document.getElementById('scanFileInput').value = '';
+    document.getElementById('scanCameraInput').value = '';
+}
 
         function switchSection(sectionId, element) {
             document.querySelectorAll('.form-section').forEach(sec => {
@@ -750,7 +928,7 @@
             } else {
                 const navLinks = document.querySelectorAll('.nav-link');
                 const index = sections.indexOf(sectionId);
-                if (navLinks[index] && index < 6) navLinks[index].classList.add('active');
+                if (navLinks[index] && index < 7) navLinks[index].classList.add('active');
             }
 
             currentSectionIndex = sections.indexOf(sectionId);
@@ -758,7 +936,7 @@
 
         function navigateForm(direction) {
             let newIndex = currentSectionIndex + direction;
-            if (newIndex >= 0 && newIndex < 6) {
+            if (newIndex >= 0 && newIndex < 7) {
                 switchSection(sections[newIndex], null);
             }
         }

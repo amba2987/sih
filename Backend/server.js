@@ -4,6 +4,7 @@ const express = require('express');
 const pool = require('./db');
 const patientRoutes = require('./routes/patientRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const scanRoutes = require('./routes/scanRoutes');
 const cors = require('cors');
 
 const app = express();
@@ -13,6 +14,8 @@ app.use(cors());
 app.use(express.json());
 app.use('/patients', patientRoutes);
 app.use(chatRoutes);
+app.use('/uploads', express.static('uploads'));
+app.use('/scans', scanRoutes);
 
 // Test DB connection on startup
 pool.getConnection()
